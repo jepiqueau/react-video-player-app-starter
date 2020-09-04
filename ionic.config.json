@@ -1,0 +1,7 @@
+{
+  "name": "react-video-player-app-starter",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "react"
+}
