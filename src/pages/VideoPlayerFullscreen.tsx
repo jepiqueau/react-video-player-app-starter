@@ -1,32 +1,19 @@
-import React, { useState, useEffect, useRef} from 'react';
+import React, { useState, useRef} from 'react';
 import { IonButton, IonModal, IonPage, IonHeader, IonToolbar, IonTitle, IonContent,
   IonButtons, useIonViewWillEnter, useIonViewDidEnter, useIonViewWillLeave } from '@ionic/react';
 import './VideoPlayerFullscreen.css';
 import { Capacitor, Plugins } from '@capacitor/core';
-import { useVideoPlayer } from 'react-video-player-hook/dist';
+import { useVideoPlayer } from 'react-video-player-hook';
 import { RouteComponentProps } from 'react-router';
 import { useStorage } from '@capacitor-community/react-hooks/storage';
 
-/*interface VideoPlayerFullscreenProps extends RouteComponentProps<{
-//    props: string;
-//      detail: any;
-}> {}
-*/
 const { Toast } = Plugins;
 
-//const VideoPlayerFullscreen: React.FC<VideoPlayerFullscreenProps> = ({match,history}) => {
 const VideoPlayerFullscreen: React.FC<RouteComponentProps> = ({/*location,*/ history}) => {
 
   const platform = Capacitor.getPlatform();
-//  const containerRef = useRef<HTMLDivElement | null>(null); 
-//  const props = JSON.parse(match.params.props);
-  //const props = location.state;
   var params: any = useRef<any>({});
   var first: any = useRef<boolean>(false);
-  const [showModal, setShowModal] = useState(false);
-  const { get, remove } = useStorage();
-//  const [first,setFirst] = useState(false);
-//  const [apiCount,setApiCount] = useState(-1);
   var apiCount = useRef<number>(-1);
   let apiTimer1: any ;
   let apiTimer2: any ;
@@ -36,6 +23,9 @@ const VideoPlayerFullscreen: React.FC<RouteComponentProps> = ({/*location,*/ his
   let readyListener: any;
   let exitListener: any;
   let endedListener: any;
+  
+  const [showModal, setShowModal] = useState(false);
+  const { get, remove } = useStorage();
 
   const {pVideoPlayer, initPlayer, isPlaying, pause, play, getDuration, setVolume,
     getVolume, setMuted, getMuted, setCurrentTime, getCurrentTime, stopAllPlayers} = useVideoPlayer();

@@ -2,6 +2,14 @@
   "name": "react-video-player-app-starter",
   "version": "0.0.2",
   "private": true,
+  "keywords": [
+    "capacitor",
+    "ionic",
+    "react",
+    "video",
+    "player",
+    "application starter"
+  ],
   "dependencies": {
     "@capacitor-community/electron": "^1.2.3",
     "@capacitor-community/react-hooks": "0.0.11",
@@ -26,7 +34,7 @@
     "react-router": "^5.1.2",
     "react-router-dom": "^5.1.2",
     "react-scripts": "^3.4.3",
-    "react-video-player-hook": "0.0.1",
+    "react-video-player-hook": "0.0.2",
     "typescript": "3.8.3"
   },
   "scripts": {
@@ -51,7 +59,18 @@
     ]
   },
   "devDependencies": {
-    "@capacitor/cli": "2.4.0"
+    "@capacitor/cli": "2.4.0",
+    "capacitor-video-player": "^2.3.1-2",
+    "react-video-player-hook": "0.0.2"
   },
-  "description": "An Ionic project"
+  "description": "Ionic/React App for capacitor-video-player using react-video-player-hook",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jepiqueau/react-video-player-app-starter.git"
+  },
+  "author": "Jean Pierre Quéau",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/jepiqueau/react-video-player-app-starter/issues"
+  }
 }
