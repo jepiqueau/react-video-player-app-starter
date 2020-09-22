@@ -18,17 +18,115 @@ const VideoPlayerFullscreen: React.FC<RouteComponentProps> = ({/*location,*/ his
   let apiTimer1: any ;
   let apiTimer2: any ;
   let apiTimer3: any ;
-  let playListener: any;
-  let pauseListener: any;
-  let readyListener: any;
-  let exitListener: any;
-  let endedListener: any;
   
   const [showModal, setShowModal] = useState(false);
   const { get, remove } = useStorage();
+  const exit = useRef(false)
 
-  const {pVideoPlayer, initPlayer, isPlaying, pause, play, getDuration, setVolume,
-    getVolume, setMuted, getMuted, setCurrentTime, getCurrentTime, stopAllPlayers} = useVideoPlayer();
+  /**
+   * Define Listeners
+   */
+
+  const onReady = (fromPlayerId: string, currentTime: number | undefined) => {
+    console.log("in OnReady playerId " + fromPlayerId +
+            " currentTime " + currentTime);
+  };
+  const onEnded = (fromPlayerId: string, currentTime: number | undefined) => {
+    console.log("in OnEnded playerId " + fromPlayerId +
+            " currentTime " + currentTime);
+      setShowModal(false);
+      exit.current = true;
+      history.push(`/home`);
+  };
+  const onExit = (dismiss: boolean) => {
+      console.log("in OnExit dismiss " + dismiss);
+      setShowModal(false);
+      exit.current = true;
+      history.push(`/home`);
+  };
+  const onPlay = async (fromPlayerId: string, currentTime: number | undefined) => {
+    console.log("in OnPlay playerId " + fromPlayerId +
+            " currentTime " + currentTime);
+    const api:boolean = params.current.api;
+    if(!exit.current) {
+      if(api && first.current && apiCount.current < 4) {
+        apiCount.current += 1;
+      }
+      if(api && first.current && apiCount.current === 0) {
+        const mIsPlaying = await isPlaying(fromPlayerId);
+        console.log("==> mIsPlaying " + JSON.stringify(mIsPlaying));
+        apiTimer1 = setTimeout(async () => {
+          const mPause = await pause(fromPlayerId);
+          console.log('==> mPause ', mPause);
+        }, 7000);
+      } else if(api && first.current && apiCount.current === 2) {
+        apiTimer2 = setTimeout(async () => {
+          const rMuted = await setMuted("fullscreen",false);
+          console.log('===> setMuted ' + JSON.stringify(rMuted));
+          let rVolume = await getVolume("fullscreen");
+          console.log("===> Volume before setVolume" + JSON.stringify(rVolume));
+          rVolume = await setVolume("fullscreen", 0.5);
+          console.log("===> setVolume " + JSON.stringify(rVolume));
+          rVolume = await getVolume("fullscreen");
+          console.log("===> Volume after setVolume" + JSON.stringify(rVolume));
+          apiTimer3 = setTimeout(async () => {
+            const rPause = await pause("fullscreen");
+            console.log('====> pause ', JSON.stringify(rPause));  
+          }, 10000);
+        }, 8000);
+      }
+    }
+  };
+  const onPause = async (fromPlayerId: string, currentTime: number | undefined) => {
+    console.log("in OnPause playerId " + fromPlayerId +
+            " currentTime " + currentTime);
+    if(!exit.current) {
+      if(params.current.api && first.current && apiCount.current === 0) {
+        apiCount.current += 1;
+        const mIsPlaying = await isPlaying(fromPlayerId);
+        console.log('==> isPlaying after pause ' + JSON.stringify(mIsPlaying));
+        const currentTime = await getCurrentTime("fullscreen");
+        console.log('==> currentTime ' + currentTime);
+        let muted = await getMuted("fullscreen");
+        console.log("==> muted before setMuted " + JSON.stringify(muted));
+        muted = await setMuted("fullscreen",!muted.value);
+        console.log("==> setMuted " + JSON.stringify(muted));
+        muted = await getMuted("fullscreen");
+        console.log("==> muted after setMuted " + JSON.stringify(muted));
+        const duration = await getDuration("fullscreen");
+        console.log("==> duration " + JSON.stringify(duration));
+        if(duration.result && duration.value > 25) {
+          // valid for movies having a duration > 25
+          const seektime = currentTime.value + 0.5 * duration.value < duration.value -25 ? currentTime.value + 0.5 * duration.value
+                          : duration.value -25;
+          const rCurrentTime = await setCurrentTime("fullscreen",seektime);
+          console.log("==> setCurrentTime " + rCurrentTime.value);
+        }
+        const rPlay = await play("fullscreen");
+        console.log("==> play " + JSON.stringify(rPlay));
+      } else if(params.current.api && first.current && apiCount.current === 2) { 
+        apiCount.current += 1;
+        const duration = await getDuration("fullscreen");
+        const volume = await setVolume("fullscreen",1.0);
+        console.log("====> Volume ",volume.value);
+        const rCurrentTime = await setCurrentTime("fullscreen",duration.value - 3);
+        console.log('====> setCurrentTime ', rCurrentTime.value);
+        const rPlay = await play("fullscreen");
+        console.log('====> play ', JSON.stringify(rPlay)); 
+      }
+    }
+  };
+
+
+  const {initPlayer, isPlaying, pause, play, getDuration, setVolume,
+        getVolume, setMuted, getMuted, setCurrentTime, getCurrentTime} = 
+    useVideoPlayer({
+      onReady,
+      onPlay,
+      onPause,
+      onEnded,
+      onExit
+  });
   /**
    * Lifecycle Methods
    */
@@ -36,6 +134,8 @@ const VideoPlayerFullscreen: React.FC<RouteComponentProps> = ({/*location,*/ his
   useIonViewWillEnter( async () => {
     setShowModal(true);
     first.current = false;
+    exit.current = false;
+
     /* doesn't work location.state not updated for successive calls
     console.log("in VideoPlayerFullscreen useIonViewWillEnter " + JSON.stringify(location.state))
     params.current = location.state;
@@ -52,19 +152,14 @@ const VideoPlayerFullscreen: React.FC<RouteComponentProps> = ({/*location,*/ his
   });
 
   useIonViewDidEnter( async () => {
-    await addListeners();
     await launchPlayer();
   });
   useIonViewWillLeave( async () => {
-    playListener.remove();
-    pauseListener.remove();
-    readyListener.remove();
-    exitListener.remove();
-    endedListener.remove();
     clearTimeout(apiTimer1);
     clearTimeout(apiTimer2);
     clearTimeout(apiTimer3);
     first.current = false;
+    exit.current = false;
   });
   /**
    * Handler Methods
@@ -74,91 +169,6 @@ const VideoPlayerFullscreen: React.FC<RouteComponentProps> = ({/*location,*/ his
     history.push(`/home`);
   }
 
-  /**
-   * Define Listener for jeepCapVideoPlayerPlay
-   */
-  async function addListeners(): Promise<void>  {
-
-    playListener = pVideoPlayer.addListener('jeepCapVideoPlayerPlay', async (data:any) => {      
-      console.log("pVideoPlayer.addListener jeepCapVideoPlayerPlay " + data.fromPlayerId + " " + data.currentTime);
-      const api:boolean = params.current.api;
-      if(api && first.current && apiCount.current < 3) {
-        apiCount.current += 1;
-      }
-      if(api && first.current && apiCount.current === 0) {
-        const mIsPlaying = await isPlaying(data.fromPlayerId);
-        console.log("==> mIsPlaying " + JSON.stringify(mIsPlaying));
-        apiTimer1 = setTimeout(async () => {
-          const mPause = await pause(data.fromPlayerId);
-          console.log('==> mPause ', mPause);
-        }, 7000);
-      } else if(api && first.current && apiCount.current === 1) {
-        apiTimer2 = setTimeout(async () => {
-          const rMuted = await setMuted("fullscreen",false);
-          console.log('===> setMuted ' + JSON.stringify(rMuted));
-          let rVolume = await getVolume("fullscreen");
-          console.log("===> Volume before setVolume" + JSON.stringify(rVolume));
-          rVolume = await setVolume("fullscreen", 0.5);
-          console.log("===> setVolume " + JSON.stringify(rVolume));
-          rVolume = await getVolume("fullscreen");
-          console.log("===> Volume after setVolume" + JSON.stringify(rVolume));
-          apiTimer3 = setTimeout(async () => {
-            const rPause = await pause("fullscreen");
-            console.log('====> pause ', JSON.stringify(rPause));  
-          }, 10000);
-        }, 8000);
-      }
-    });
-    pauseListener = pVideoPlayer.addListener('jeepCapVideoPlayerPause', async (data:any) => {
-        if(params.current.api && first.current && apiCount.current === 0) {
-          const mIsPlaying = await isPlaying(data.fromPlayerId);
-          console.log('==> isPlaying after pause ' + JSON.stringify(mIsPlaying));
-          const currentTime = await getCurrentTime("fullscreen");
-          console.log('==> currentTime ' + currentTime);
-          let muted = await getMuted("fullscreen");
-          console.log("==> muted before setMuted " + JSON.stringify(muted));
-          muted = await setMuted("fullscreen",!muted.value);
-          console.log("==> setMuted " + JSON.stringify(muted));
-          muted = await getMuted("fullscreen");
-          console.log("==> muted after setMuted " + JSON.stringify(muted));
-          const duration = await getDuration("fullscreen");
-          console.log("==> duration " + JSON.stringify(duration));
-          if(duration.result && duration.value > 25) {
-            // valid for movies having a duration > 25
-            const seektime = currentTime.value + 0.5 * duration.value < duration.value -25 ? currentTime.value + 0.5 * duration.value
-                            : duration.value -25;
-            const rCurrentTime = await setCurrentTime("fullscreen",seektime);
-            console.log("==> setCurrentTime " + rCurrentTime.value);
-          }
-          const rPlay = await play("fullscreen");
-          console.log("==> play " + JSON.stringify(rPlay));
-        } else if(params.current.api && first.current && apiCount.current === 1) { 
-          const duration = await getDuration("fullscreen");
-          const volume = await setVolume("fullscreen",1.0);
-          console.log("====> Volume ",volume.value);
-          const rCurrentTime = await setCurrentTime("fullscreen",duration.value - 3);
-          console.log('====> setCurrentTime ', rCurrentTime.value);
-          const rPlay = await play("fullscreen");
-          console.log('====> play ', JSON.stringify(rPlay)); 
-        }
-     
-    });
-    exitListener = pVideoPlayer.addListener('jeepCapVideoPlayerExit', (data:any) => {
-        //TODO Stop all players
-      console.log("in pVideoPlayer.addListener jeepCapVideoPlayerExit " + JSON.stringify(data))
-      setShowModal(false);
-      history.push(`/home`);
-    });
-    endedListener = pVideoPlayer.addListener('jeepCapVideoPlayerEnded', (data:any) => {
-        console.log("in pVideoPlayer.addListener jeepCapVideoPlayerEnded " + JSON.stringify(data))
-      setShowModal(false);
-      history.push(`/home`);
-    });
-    readyListener = pVideoPlayer.addListener('jeepCapVideoPlayerReady', (data:any) => {
-        console.log("pVideoPlayer.addListener jeepCapVideoPlayerReady " + data.fromPlayerId + " " + data.currentTime);      
-    });
-    return;
-  }
   /**
    * Launch Player
    */

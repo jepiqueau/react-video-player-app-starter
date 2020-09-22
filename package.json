@@ -1,6 +1,6 @@
 {
   "name": "react-video-player-app-starter",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "private": true,
   "keywords": [
     "capacitor",
@@ -27,14 +27,12 @@
     "@types/react-dom": "^16.9.4",
     "@types/react-router": "^5.1.4",
     "@types/react-router-dom": "^5.1.3",
-    "capacitor-video-player": "^2.3.1-2",
     "ionicons": "^5.0.0",
     "react": "^16.13.0",
     "react-dom": "^16.13.0",
     "react-router": "^5.1.2",
     "react-router-dom": "^5.1.2",
     "react-scripts": "^3.4.3",
-    "react-video-player-hook": "0.0.2",
     "typescript": "3.8.3"
   },
   "scripts": {
@@ -60,8 +58,8 @@
   },
   "devDependencies": {
     "@capacitor/cli": "2.4.0",
-    "capacitor-video-player": "^2.3.1-2",
-    "react-video-player-hook": "0.0.2"
+    "capacitor-video-player": "^2.3.1-3",
+    "react-video-player-hook": "0.0.3"
   },
   "description": "Ionic/React App for capacitor-video-player using react-video-player-hook",
   "repository": {
