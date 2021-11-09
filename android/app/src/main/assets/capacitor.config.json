@@ -1,13 +1,13 @@
 {
-  "appId": "com.jeep.app.ionic.react.videoplayer",
-  "appName": "react-video-player-app-starter",
-  "bundledWebRuntime": false,
-  "npmClient": "npm",
-  "webDir": "build",
-  "plugins": {
-    "SplashScreen": {
-      "launchShowDuration": 0
-    }
-  },
-  "cordova": {}
+	"appId": "com.jeep.app.ionic.react.videoplayer",
+	"appName": "react-video-player-app-starter",
+	"bundledWebRuntime": false,
+	"npmClient": "npm",
+	"webDir": "build",
+	"plugins": {
+		"SplashScreen": {
+			"launchShowDuration": 0
+		}
+	},
+	"cordova": {}
 }

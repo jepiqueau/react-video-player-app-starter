@@ -2,12 +2,11 @@ import React, { useState, useRef} from 'react';
 import { IonButton, IonModal, IonPage, IonHeader, IonToolbar, IonTitle, IonContent,
   IonButtons, useIonViewWillEnter, useIonViewDidEnter, useIonViewWillLeave } from '@ionic/react';
 import './VideoPlayerFullscreen.css';
-import { Capacitor, Plugins } from '@capacitor/core';
+import { Capacitor } from '@capacitor/core';
 import { useVideoPlayer } from 'react-video-player-hook';
 import { RouteComponentProps } from 'react-router';
-import { useStorage } from '@capacitor-community/react-hooks/storage';
-
-const { Toast } = Plugins;
+import { useStorage } from '@capacitor-community/storage-react';
+import { Toast } from '@capacitor/toast';
 
 const VideoPlayerFullscreen: React.FC<RouteComponentProps> = ({/*location,*/ history}) => {
 

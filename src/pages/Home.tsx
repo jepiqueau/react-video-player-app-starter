@@ -1,7 +1,7 @@
 import { IonContent, IonHeader, IonPage, IonTitle, IonToolbar, IonButton,
-  IonList, IonItem, useIonViewWillEnter, useIonViewDidEnter } from '@ionic/react';
+  IonList, IonItem, useIonViewWillEnter } from '@ionic/react';
 import React, {useState, useEffect, useRef} from 'react';
-import { useStorage } from '@capacitor-community/react-hooks/storage';
+import { useStorage } from '@capacitor-community/storage-react';
 
 import './Home.css';
 import { Capacitor } from '@capacitor/core';
@@ -25,9 +25,6 @@ const Home: React.FC<RouteComponentProps> = () => {
     setType("");
     api.current = false;
   });
-//  useIonViewDidEnter( async () => {
-//    await launchFullscreen();
-//  });
   useEffect( () => {
     async function launchFullscreen(): Promise<void>  {
 
